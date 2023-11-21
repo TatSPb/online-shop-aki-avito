@@ -2,8 +2,9 @@ package ru.skypro.homework.dto;
 
 import lombok.Data;
 
+/*** Data Transfer Object / Объект передачи данных ***/
 @Data
-public class FullAd {
+public class FullAdDto {
 
     private Integer pk;
     private String authorFirstName;
@@ -14,6 +15,6 @@ public class FullAd {
     private String phone;
     private Integer price;
     private String title;
-    public FullAd() {
+    public FullAdDto() {
     }
 }

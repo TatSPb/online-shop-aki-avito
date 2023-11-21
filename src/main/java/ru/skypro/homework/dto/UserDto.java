@@ -2,8 +2,9 @@ package ru.skypro.homework.dto;
 
 import lombok.Data;
 
+/*** Data Transfer Object / Объект передачи данных ***/
 @Data
-public class User {
+public class UserDto {
     public Long id;
     public String email;
     public String firstName;
@@ -11,6 +12,6 @@ public class User {
     public String phone;
     private String image;
 
-    public User() {
+    public UserDto() {
     }
 }

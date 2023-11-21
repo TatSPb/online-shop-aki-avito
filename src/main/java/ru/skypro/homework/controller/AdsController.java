@@ -1,8 +1,6 @@
 package ru.skypro.homework.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,35 +20,40 @@ public class AdsController {
 
     /*** Method to get a whole set of ads  / Метод для получения всех объявлений **/
     @GetMapping()
-    public Ad getAllAds() {
-        return new Ad();
+    public AdDto getAllAds() {
+        return new AdDto();
     }
 
-    /*** Method to set a new advert  / Метод для добавления нового объявления **/
+
+    /*** Method to set a new ad  / Метод для добавления нового объявления **/
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Ad addAds(Authentication authentication,
-                     @RequestPart("properties") CreateAds properties,
-                     @RequestPart("image") MultipartFile file) throws IOException {
-        return new Ad();
+    public AdDto addAds(Authentication authentication,
+                        @RequestPart("properties") CreateAds properties,
+                        @RequestPart("image") MultipartFile file) throws IOException {
+        return new AdDto();
     }
+
 
     /*** Method to get an ad data  / Метод для получения информации о объявлении **/
     @GetMapping("{id}")
-    public FullAd getAds(@PathVariable Integer id) {
-        return new FullAd();
+    public FullAdDto getAds(@PathVariable Integer id) {
+        return new FullAdDto();
     }
+
 
     /*** Method to delete an ad   / Метод для удаления объявления **/
     @DeleteMapping("{id}")
-    public Ad removeAd(Authentication authentication, @PathVariable int id) {
-        return new Ad();
+    public AdDto removeAd(Authentication authentication, @PathVariable int id) {
+        return new AdDto();
     }
+
 
     /*** Method to update an ad data  / Метод для обновления информации об объявлении **/
     @PatchMapping("{id}")
-    public Ad updateAds(Authentication authentication, @PathVariable int id, @RequestBody CreateAds createAds) {
-        return new Ad();
+    public AdDto updateAds(Authentication authentication, @PathVariable int id, @RequestBody CreateAds createAds) {
+        return new AdDto();
     }
+
 
     /*** Method to get an authorized user ad  / Метод для получения объявления авторизованного пользователя **/
     @GetMapping("me")
@@ -61,12 +64,14 @@ public class AdsController {
 
     /*** Method to update an ad image  / Метод для обновления картинки объявления ***/
     @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Ad updateImage(@PathVariable Integer id, @RequestParam MultipartFile image) {
-        return new Ad();
+    public AdDto updateImage(@PathVariable Integer id, @RequestParam MultipartFile image) {
+        return new AdDto();
     }
 
 
-    /*** METHODS TO WORK WITH COMMENTS / МЕТОДЫ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ ***/
+
+    /*** METHODS TO DEAL WITH COMMENTS / МЕТОДЫ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ ***/
+
 
     /*** Method to get an ad comments  / Метод для получения комментариев объявления ***/
     @GetMapping("{id}/comments")
@@ -74,23 +79,29 @@ public class AdsController {
         return new ResponseWrapperComment();
     }
 
+
     /*** Method to add a comment to ad  / Метод для добавления комментария к объявлению ***/
     @PostMapping("{id}/comments")
-    public Comment addComment(@PathVariable Integer id,
-                              @RequestBody CreateComment createCommentDto,
-                              Authentication authentication) {
-        return new Comment();
+    public CommentDto addComment(@PathVariable Integer id,
+                                 @RequestBody CreateComment createComment,
+                                 Authentication authentication) {
+        return new CommentDto();
     }
+
 
     /*** Method to delete a comment from ad  / Метод для удаления комментария из объявления ***/
     @DeleteMapping("{id}")
-    public Comment removeComment(Authentication authentication, int id) {
-        return new Comment();
+    public CommentDto removeComment(Authentication authentication, int id) {
+        return new CommentDto();
     }
 
-    /*** Method to update an ad comments  / Метод для обновления комментария объявления ***/
+
+    /*** Method to update an ad comment / Метод для обновления комментария объявления ***/
     @PatchMapping("{id}")
-    public Comment updateComment(Authentication authentication, @PathVariable int id, @RequestBody CreateAds createAds) {
-        return new Comment();
+    public CommentDto updateComment(Authentication authentication,
+                                    @PathVariable("adId") Integer adId,
+                                    @PathVariable("commentId") Integer commentId,
+                                    @RequestBody CommentDto commentDto) {
+        return new CommentDto();
     }
 }
