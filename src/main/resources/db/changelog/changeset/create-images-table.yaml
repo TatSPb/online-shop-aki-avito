@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-images
+      author: t-sve
+      changes:
+        - createTable:
+            tableName: images
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: image_name
+                  type: varchar

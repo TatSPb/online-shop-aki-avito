@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-comments
+      author: t-sve
+      changes:
+        - createTable:
+            tableName: comments
+            columns:
+              - column:
+                  name: comment_id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: ad_id
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: text
+                  type: varchar
+                  constraints:
+                    nullable: false

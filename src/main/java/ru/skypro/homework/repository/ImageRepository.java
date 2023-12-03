@@ -2,12 +2,8 @@ package ru.skypro.homework.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.skypro.homework.model.ImageModel;
-
-/*** Image repository / Репозиторий изображений ***/
+import ru.skypro.homework.model.Image;
 @Repository
-public interface ImageRepository extends JpaRepository<ImageModel,Integer> {
-
-
-    void deleteImageModelsByAdsModel_Id(Integer id);
+public interface ImageRepository extends JpaRepository<Image, Integer> {
+    Image findAdImageByImageName(String imageAddress);
 }
