@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-users
+      author: t-sve
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_image_id
+                  type: integer
