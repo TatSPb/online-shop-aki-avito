@@ -1,9 +1,13 @@
 package ru.skypro.homework.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
-public class FullAd {
+public class ExtendedAd {
 
     private Integer pk;
     private String authorFirstName;
@@ -14,6 +18,4 @@ public class FullAd {
     private String phone;
     private Integer price;
     private String title;
-    public FullAd() {
-    }
 }

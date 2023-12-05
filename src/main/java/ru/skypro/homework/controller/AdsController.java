@@ -1,100 +1,219 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exception.NoPermissonException;
+import ru.skypro.homework.exception.UnauthorizedException;
+import ru.skypro.homework.service.impl.AdService;
+import ru.skypro.homework.service.impl.CommentService;
 
-import java.io.IOException;
 
-
-/*** ЭТАП #1 - Написание DTO, контроллеров ***/
+/**
+ * КОНТРОЛЛЕР ДЛЯ РАБОТЫ С ОБЪЯВЛЕНИЯМИ И КОММЕНТАРИЯМИ
+ */
 
 @RestController
 @RequestMapping("/ads")
 @CrossOrigin(value = "http://localhost:3000")
+@RequiredArgsConstructor
 public class AdsController {
+    private final AdService adService;
+    private final CommentService commentService;
 
-/*** METHODS TO WORK WITH ADS / МЕТОДЫ ДЛЯ РАБОТЫ С ОБЪЯВЛЕНИЯМИ ***/
-
-    /*** Method to get a whole set of ads  / Метод для получения всех объявлений **/
+    /**
+     * ПОЛУЧЕНИЕ ВСЕХ ОБЪЯВЛЕНИЙ ОТ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ.
+     *
+     * @return: ответ сервера со статусом 200
+     */
+    @Tag(name = "Объявления")
+    @Operation(summary = "Получение всех объявлений")
+    @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping()
-    public Ad getAllAds() {
-        return new Ad();
+    public ResponseEntity<?> getAllAds() {
+        return ResponseEntity.ok().body(adService.getAds());
     }
 
-    /*** Method to set a new advert  / Метод для добавления нового объявления **/
+    /**
+     * ДОБАВЛЕНИЕ НОВОГО ОБЪЯВЛЕНИЯ АВТОРИЗИРОВАННЫМ ПОЛЬЗОВАТЕЛЕМ.
+     *
+     * @param properties - объект созданного объявления (CreateOrUpdateAd properties)
+     * @param image      - файл с изображением товара (MultipartFile image).
+     * @return ответ сервера со статусом 200 / 401
+     */
+    @Tag(name = "Объявления")
+    @Operation(summary = "Добавление объявления")
+    @ApiResponse(responseCode = "201", description = "CREATED")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Ad addAds(Authentication authentication,
-                     @RequestPart("properties") CreateAds properties,
-                     @RequestPart("image") MultipartFile file) throws IOException {
-        return new Ad();
+    public ResponseEntity<AdDTO> addAd(@RequestPart CreateOrUpdateAd properties,
+                                       @RequestPart("image") MultipartFile image) throws UnauthorizedException {
+        return ResponseEntity.ok(adService.addAd(properties, image));
     }
 
-    /*** Method to get an ad data  / Метод для получения информации о объявлении **/
+    /**
+     * ПОЛУЧЕНИЕ ИНФОРМАЦИИ ОБ ОБЪЯВЛЕНИИ.
+     *
+     * @param id - идентификатор объявления (Integer id)
+     * @return ответ сервера со статусом 200 / 401
+     */
+    @Tag(name = "Объявления")
+    @Operation(summary = "Получение информации об объявлении")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @GetMapping("{id}")
-    public FullAd getAds(@PathVariable Integer id) {
-        return new FullAd();
+    public ResponseEntity<ExtendedAd> getAd(@PathVariable Integer id) {
+        return ResponseEntity.ok().body(adService.getAd(id));
     }
 
-    /*** Method to delete an ad   / Метод для удаления объявления **/
+    /**
+     * УДАЛЕНИЕ ОБЪЯВЛЕНИЯ.
+     *
+     * @param id - идентификатор объявления (Integer id)
+     * @return ответ сервера со статусом 200 / 204 / 401 / 403 / 404
+     */
+    @Tag(name = "Объявления")
+    @Operation(summary = "Удалить объявление")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "204", description = "NO_CONTENT")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
+    @ApiResponse(responseCode = "403", description = "FORBIDDEN")
+    @ApiResponse(responseCode = "404", description = "NOT_FOUND")
     @DeleteMapping("{id}")
-    public Ad removeAd(Authentication authentication, @PathVariable int id) {
-        return new Ad();
+    public ResponseEntity<?> removeAd(@PathVariable Integer id) {
+        adService.removeAd(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    /*** Method to update an ad data  / Метод для обновления информации об объявлении **/
+    /**
+     * ОБНОВЛЕНИЕ ИНФОРМАЦИИ ОБ ОБЪЯВЛЕНИИ.
+     *
+     * @param id    - идентификатор объявления (Integer id)
+     * @param newAd - объект созданного объявления (CreateOrUpdateAd properties)
+     * @return ответ сервера со статусом 200 / 401 / 403 / 404
+     */
     @PatchMapping("{id}")
-    public Ad updateAds(Authentication authentication, @PathVariable int id, @RequestBody CreateAds createAds) {
-        return new Ad();
+    public ResponseEntity<?> updateAds(@PathVariable Integer id,
+                                       @RequestBody CreateOrUpdateAd newAd) {
+        return ResponseEntity.ok().body(adService.updateAdInfo(id, newAd));
     }
 
-    /*** Method to get an authorized user ad  / Метод для получения объявления авторизованного пользователя **/
+    /**
+     * ПОЛУЧЕНИЕ ОБЪЯВЛЕНИЙ АВТОРИЗИРОВАННОГО ПОЛЬЗОВАТЕЛЯ.
+     *
+     * @return ответ сервера со статусом 200 / 401 / 403 / 404
+     */
+    @Tag(name = "Объявления")
+    @Operation(summary = "Получить объявления авторизованного пользователя")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
+    @ApiResponse(responseCode = "403", description = "FORBIDDEN")
+    @ApiResponse(responseCode = "404", description = "NOT_FOUND")
     @GetMapping("me")
-    public ResponseWrapperAds getAdsMe() {
-        return new ResponseWrapperAds();
+    public ResponseEntity<?> getAdsMe() {
+        return ResponseEntity.ok().body(adService.getUserAllAds());
     }
 
-
-    /*** Method to update an ad image  / Метод для обновления картинки объявления ***/
+    /**
+     * ОБНОВЛЕНИЕ КАРТИНКИ ТОВАРА В ОБЪЯВЛЕНИИ.
+     *
+     * @param id   - идентификатор объявления (Integer id)
+     * @param file - файл с новым изображением товара (MultipartFile file).
+     * @return ответ сервера со статусом 200 / 401 / 403 / 404
+     */
+    @Tag(name = "Объявления")
+    @Operation(summary = "Обновление картинки объявления")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
+    @ApiResponse(responseCode = "403", description = "FORBIDDEN")
+    @ApiResponse(responseCode = "404", description = "NOT_FOUND")
     @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Ad updateImage(@PathVariable Integer id, @RequestParam MultipartFile image) {
-        return new Ad();
+    public ResponseEntity<?> updateImage(@PathVariable Integer id,
+                                         @RequestParam("image") MultipartFile file) throws NoPermissonException {
+        return ResponseEntity.ok().body(adService.updateAdImage(id, file));
     }
 
 
-    /*** METHODS TO WORK WITH COMMENTS / МЕТОДЫ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ ***/
+    /** КОНТРОЛЛЕРЫ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ. */
 
-    /*** Method to get an ad comments  / Метод для получения комментариев объявления ***/
+    /**
+     * ПОЛУЧЕНИЕ КОММЕНТАРИЕВ К ОБЪЯВЛЕНИЮ.
+     *
+     * @param id - идентификатор объявления (Integer id);
+     * @return ответ сервера со статусом 200 / 401
+     */
+    @Tag(name = "Комментарии")
+    @Operation(summary = "Получение комментариев объявления")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @GetMapping("{id}/comments")
-    public ResponseWrapperComment getComments(@PathVariable Integer id) {
-        return new ResponseWrapperComment();
+    public ResponseEntity<CommentCount> getComments(@PathVariable(name = "id") Integer id) {
+        return ResponseEntity.ok().body(commentService.getCommentsOfAd(id));
     }
 
-    /*** Method to add a comment to ad  / Метод для добавления комментария к объявлению ***/
+    /**
+     * ДОБАВЛЕНИЕ КОММЕНТАРИЯ К ОБЪЯВЛЕНИЮ.
+     *
+     * @param id   - идентификатор объявления (Integer id)
+     * @param text - объект с текстом комментария (CreateOrUpdateComment text)
+     * @return ответ сервера со статусом 200 / 401
+     */
+    @Tag(name = "Комментарии")
+    @Operation(summary = "Добавление комментария к объявлению")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @PostMapping("{id}/comments")
-    public Comment addComment(@PathVariable Integer id,
-                              @RequestBody CreateComment createCommentDto,
-                              Authentication authentication) {
-        return new Comment();
+    public ResponseEntity<CommentDTO> addComment(@PathVariable(name = "id") Integer id,
+                                                 @RequestBody CreateOrUpdateComment text) {
+        //some code
+        return ResponseEntity.ok().body(commentService.addCommentToAd(id, text));
     }
 
-    /*** Method to delete a comment from ad  / Метод для удаления комментария из объявления ***/
-    @DeleteMapping("{id}")
-    public Comment removeComment(Authentication authentication, int id) {
-        return new Comment();
+    /**
+     * УДАЛЕНИЕ КОММЕНТАРИЯ ИЗ ОБЪЯВЛЕНИЯ.
+     *
+     * @param adId      - идентификатор объявления (Integer adId)
+     * @param commentId - идентификатор комментария (Integer commentId)
+     * @return ответ сервера со статусом 200 / 401 / 403 / 404
+     */
+    @Tag(name = "Комментарии")
+    @Operation(summary = "Удаление комментария")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
+    @ApiResponse(responseCode = "403", description = "FORBIDDEN")
+    @ApiResponse(responseCode = "404", description = "NOT_FOUND")
+    @DeleteMapping("{adId}/comments/{commentId}")
+    public ResponseEntity<?> deleteComments(@PathVariable Integer adId,
+                                            @PathVariable Integer commentId) {
+        commentService.deleteCommentById(adId, commentId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    /*** Method to update an ad comments  / Метод для обновления комментария объявления ***/
-    //BizinMitya здесь должно быть 2 id по спецификации - id объявления и id комментария
-    @PatchMapping("{id}")
-    public class AdsController {
-    }
-
-    public Comment updateComment(Authentication authentication, @PathVariable int id, @RequestBody CreateAds createAds) {
-        return new Comment();
+    /**
+     * ОБНОВЛЕНИЕ КОММЕНТАРИЯ В ОБЪЯВЛЕНИИ.
+     *
+     * @param adId      - идентификатор объявления (Integer adId)
+     * @param commentId - идентификатор комментария (Integer commentId)
+     * @param newText   - объект с новым текстом комментария (CreateOrUpdateComment newText)
+     * @return ответ сервера со статусом 200 / 401 / 403 / 404
+     */
+    @Tag(name = "Комментарии")
+    @Operation(summary = "Обновление комментария")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
+    @ApiResponse(responseCode = "403", description = "FORBIDDEN")
+    @ApiResponse(responseCode = "404", description = "NOT_FOUND")
+    @PatchMapping("{adId}/comments/{commentId}")
+    public ResponseEntity<?> updateComments(@PathVariable Integer adId,
+                                            @PathVariable Integer commentId,
+                                            @RequestBody CreateOrUpdateComment newText) {
+        return ResponseEntity.ok().body(commentService.updateCommentById(adId, commentId, newText));
     }
 }

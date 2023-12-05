@@ -1,49 +1,90 @@
 package ru.skypro.homework.controller;
 
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.User;
 
-import java.io.IOException;
+import ru.skypro.homework.dto.*;
+import ru.skypro.homework.exception.UnauthorizedException;
+import ru.skypro.homework.service.impl.UserService;
 
-
-/*** ЭТАП #1 - Написание DTO, контроллеров ***/
+/**
+ * КОНТРОЛЛЕР ПО РАБОТЕ С ПОЛУЧЕНИЕМ И ОБНОВЛЕНИЕМ ИНФОРМАЦИИ ОБ АВТОРИЗИРОВАННОМ ПОЛЬЗОВАТЕЛЕ.
+ */
 
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(value = "http://localhost:3000")
+@Slf4j
 public class UserController {
+    private final UserService userService;
 
-    /*** Method to update an authorized user data / Метод для обновления данных об авторизованном пользователе ***/
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+
+    /**
+     * ОБНОВЛЕНИЕ ЛИЧНОЙ ИНФОРМАЦИИ ПОЛЬЗОВАТЕЛЯ В ПРОФИЛЕ (ИМЯ, ФАМИЛИЯ, ТЕЛЕФОН).
+     *
+     * @param userUpdateReq - DTO-объект с новыми данными пользователя (UserUpdateReq userUpdateReq)
+     * @return: ответ сервера со статусом 200 / 401
+     */
+    @Tag(name = "Пользователи")
+    @Operation(summary = "Обновление информации об авторизованном пользователе")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @PatchMapping("/me")
-    public User updateUser(@RequestBody User user) {
-        System.out.println("Инфо в логах: updateUser() works correctly");
-        return new User();
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateReq userUpdateReq) throws UnauthorizedException {
+        userService.updateUser(userUpdateReq);
+        return ResponseEntity.ok().body(userUpdateReq);
     }
 
-    /*** Method to set a new user password  / Метод для обновления пароля пользователя **/
+    /**
+     * ОБНОВЛЯЕТ ПАРОЛЬ АВТОРИЗИРОВАННОГО ПОЛЬЗОВАТЕЛЯ.
+     * @param  newPassword - DTO-объект с новым паролем (PasswordDTO newPassword)
+     * @return: ответ сервера со статусом 200
+     **/
+    @Tag(name = "Пользователи")
+    @Operation(summary = "Обновление пароля")
+    @ApiResponse(responseCode = "200", description = "OK")
     @PostMapping("/set_password")
-    public User setPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
-        System.out.println("Инфо в логах: setPassword() works correctly");
-        return new User();
+    public ResponseEntity<?> setPassword(@RequestBody PasswordDTO newPassword) {
+        userService.updateUserPassword(newPassword);
+        return ResponseEntity.ok().build();
     }
 
-    /*** Method to get an authorized user data  / Метод для получения информации об авторизованном пользователе **/
+    /**
+     * ПОЛУЧАЕТ ИНФОРМАЦИЮ ОБ АВТОРИЗИРОВАННОМ ПОЛЬЗОВАТЕЛЕ.
+     * @return: ответ сервера со статусом 200 / 401
+     **/
+    @Tag(name = "Пользователи")
+    @Operation(summary = "Получение информации об авторизованном пользователе")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @GetMapping("/me")
-    public User getUser(Authentication authentication) {
-        return new User();
+    public ResponseEntity<?> getUser() throws UnauthorizedException {
+        UserDTO userDTO = userService.getUser() ;
+        return ResponseEntity.ok().body(userDTO);
     }
 
-    /*** Method to update an authorized user avatar  / Метод для обновления аватара авторизованного пользователя **/
+    /**
+     * ОБНОВЛЯЕТ АВАТАР АВТОРИЗИРОВАННОГО ПОЛЬЗОВАТЕЛЯ.
+     * @param file - файл с новым изображением пользователя (MultipartFile file)
+     * @return: ответ сервера со статусом 200 / 401
+     **/
+    @Tag(name = "Пользователи")
+    @Operation(summary = "Обновление аватара авторизованного пользователя")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
     @PatchMapping(value = "me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public User updateUserImage(@RequestParam("image") MultipartFile file) throws IOException {
-        return new User();
+    public ResponseEntity<?> updateUserImage(@RequestParam("image") MultipartFile file) throws UnauthorizedException {
+        userService.updateUserImage(file);
+        return ResponseEntity.ok().build();
     }
-
-
 }
