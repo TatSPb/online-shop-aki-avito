@@ -7,11 +7,11 @@ import ru.skypro.homework.dto.Role;
 @Data
 @AllArgsConstructor
 public class UserDTO {
-    Integer id;
-    String email;
-    String firstName;
-    String lastName;
-    Role role;
-    String phone;
-    String image;
+    private Integer id;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private  Role role;
+    private String phone;
+    private  String image;
 }
