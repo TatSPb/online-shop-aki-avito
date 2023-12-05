@@ -6,8 +6,8 @@ import java.util.List;
 @Data
 public class AdsCount {
 
-    Integer count;
-    List<AdDTO> results;
+    private Integer count;
+    private List<AdDTO> results;
 
     public AdsCount(List<AdDTO> results) {
         this.count = results.size();

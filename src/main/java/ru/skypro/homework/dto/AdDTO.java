@@ -8,9 +8,9 @@ import lombok.*;
 @Setter
 @Data
 public class AdDTO {
-    Integer author;
-    String image;
-    Integer pk;
-    Integer price;
-    String title;
+    private Integer author;
+    private String image;
+    private Integer pk;
+    private Integer price;
+    private String title;
 }

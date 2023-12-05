@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class CommentCount {
-    Integer count;
-    List<CommentDTO> results = new ArrayList<>();
+    private Integer count;
+    private List<CommentDTO> results = new ArrayList<>();
 }

@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class AdsAddReq {
-    String description;
-    int price;
-    String title;
-    String image;
+    private String description;
+    private int price;
+    private String title;
+    //String image; //BizinMitya 05.12 здесь нет картинки в этом dto
 }
