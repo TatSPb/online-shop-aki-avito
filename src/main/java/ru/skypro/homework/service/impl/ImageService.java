@@ -28,7 +28,7 @@ public class ImageService {
 
     private UserRepository userRepository;
     private AdRepository adRepository;
-    Logger LOG = LoggerFactory.getLogger(AdService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdService.class);
     @Value("${path.to.ad.images}/")
     private String pathToAdImages;
 

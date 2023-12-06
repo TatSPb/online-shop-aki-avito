@@ -11,6 +11,7 @@ import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.exception.NoPermissonException;
 import ru.skypro.homework.exception.UnauthorizedException;
+import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
@@ -31,43 +32,19 @@ public class AdService {
     private final AdRepository adRepository;
     private final UserService userService;
     private final ImageService imageService;
+    private final AdMapper adMapper;
+    private final AdsCount adsCount;
 
-    Logger LOG = LoggerFactory.getLogger(AdService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdService.class);
     @Value("${path.to.ad.images}/")
     private String pathToAdImages;
 
-    public AdService(AdRepository adRepository, UserService userService, ImageService imageService) {
+    public AdService(AdRepository adRepository, UserService userService, ImageService imageService, AdMapper adMapper, AdsCount adsCount) {
         this.adRepository = adRepository;
         this.userService = userService;
         this.imageService = imageService;
-    }
-
-    /**
-     * Маппер для трансформации entity-объекта Ad в DTO-объект AdDTO.
-     */
-    public AdDTO adToDTO(Ad ad) {
-        return new AdDTO(
-                ad.getAuthor().getId(),
-                "/ads/image/" + ad.getPk(),
-                ad.getPk(),
-                ad.getPrice(),
-                ad.getTitle());
-    }
-
-    /**
-     * Маппер для преобразования entity-объекта Ad в DTO-объект ExtendedDTO.
-     */
-    public ExtendedAd adToExtendedAd(Ad ad) {
-        return new ExtendedAd(
-                ad.getPk(),
-                ad.getAuthor().getFirstName(),
-                ad.getAuthor().getLastName(),
-                ad.getDescription(),
-                ad.getAuthor().getUsername(),
-                "/ads/image/" + ad.getPk(),
-                ad.getAuthor().getPhone(),
-                ad.getPrice(),
-                ad.getTitle());
+        this.adMapper = adMapper;
+        this.adsCount = adsCount;
     }
 
     /**
@@ -76,7 +53,10 @@ public class AdService {
     public AdsCount getAds() {
         LOG.info("Was invoked method GET_ADS");
         List<Ad> adsList = adRepository.findAll();
-        return new AdsCount(adsList.stream().map(this::adToDTO).collect(Collectors.toList()));
+        return new AdsCount(adsList.stream().
+                map(adMapper::adToDTO)
+                .collect(Collectors.toList())
+        );
     }
 
     /**
@@ -91,16 +71,18 @@ public class AdService {
     public AdDTO addAd(CreateOrUpdateAd createOrUpdateAd, MultipartFile file) throws UnauthorizedException {
         LOG.info("Was invoked method ADD_AD");
         User user = userService.getAuthUser();
-        if (user == null) {
-            throw new UnauthorizedException();
-        }
+        // BizinMitya 6/12 эта проверка не нужно, потому что в WebSecurityConfig уже настроено,
+        // что запрос может выполнять только аутентифицированный юзер
+//        if (user == null) {
+//            throw new UnauthorizedException();
+//        }
         if (isNotEmptyAndNotNull(createOrUpdateAd.getDescription()) && createOrUpdateAd.getPrice() >= 0
                 && isNotEmptyAndNotNull(createOrUpdateAd.getTitle())) {
             Ad ad = new Ad(user, createOrUpdateAd.getDescription(), null, createOrUpdateAd.getPrice(),
                     createOrUpdateAd.getTitle());
             Ad savedAd = adRepository.save(ad);
             imageService.updateAdImage(savedAd.getPk(), file);
-            return adToDTO(savedAd);
+            return adMapper.adToDTO(savedAd);
         }
         throw new IllegalArgumentException();
     }
@@ -114,7 +96,7 @@ public class AdService {
     public ExtendedAd getAd(int id) {
         LOG.info("Was invoked method GET_AD");
         Ad ad = adRepository.findById(id).orElseThrow();
-        return adToExtendedAd(ad);
+        return adMapper.adToExtendedAd(ad);
     }
 
     /**
@@ -161,7 +143,7 @@ public class AdService {
                 ad.setTitle(createOrUpdateAd.getTitle());
                 ad.setPrice(createOrUpdateAd.getPrice());
             }
-            return adToDTO(adRepository.save(ad));
+            return adMapper.adToDTO(adRepository.save(ad));
         }
         throw new IllegalArgumentException();
     }
@@ -174,8 +156,11 @@ public class AdService {
     public AdsCount getUserAllAds() {
         LOG.info("Was invoked method GET_USER_ALL_ADS");
         User user = userService.getAuthUser();
-        List<AdDTO> list = adRepository.findAdsByAuthor(user).stream().map(this::adToDTO).collect(Collectors.toList());
-        return new AdsCount(list);
+        List<Ad> adList = adRepository.findAdsByAuthor(user);
+        return new AdsCount(adList.stream().
+                map(adMapper::adToDTO)
+                .collect(Collectors.toList())
+        );
     }
 
     /**
@@ -198,7 +183,7 @@ public class AdService {
             } catch (IOException e) {
                 throw new RuntimeException();
             }
-            return adToDTO(ad);
+            return adMapper.adToDTO(ad);
         } else {
             throw new NoPermissonException();
         }

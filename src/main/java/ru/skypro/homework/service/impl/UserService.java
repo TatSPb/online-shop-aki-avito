@@ -4,27 +4,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.PasswordDTO;
 import ru.skypro.homework.dto.UserDTO;
+import ru.skypro.homework.dto.UserDetailsDTO;
 import ru.skypro.homework.dto.UserUpdateReq;
 import ru.skypro.homework.exception.UnauthorizedException;
 import ru.skypro.homework.model.User;
+import ru.skypro.homework.model.UserPrincipal;
 import ru.skypro.homework.repository.UserRepository;
 
 import javax.transaction.Transactional;
 
+import java.util.NoSuchElementException;
+
 import static ru.skypro.homework.utils.ValidationUtils.isNotEmptyAndNotNull;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageService imageService;
-    Logger LOG = LoggerFactory.getLogger(UserService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ImageService imageService) {
         this.userRepository = userRepository;
@@ -128,4 +135,28 @@ public class UserService {
         imageService.updateUserImage(user.getUsername(), file);
         return true;
     }
+
+    /**
+     * Метод для загрузки данных пользователя по его имени.
+     *
+     * @param username имя пользователя (String username)
+     * @return UserDetail - данные пользователя
+     */
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findUserByUsername(username).orElseThrow(NoSuchElementException::new);
+        UserDetailsDTO userDetailsDTO = new UserDetailsDTO(user.getUsername(), user.getPassword(), user.getId(), user.getRole());
+        return new UserPrincipal(userDetailsDTO);
+    }
+
+    /**
+     * Метод для подтверждения существования пользователя в репозитории.
+     *
+     * @param username имя пользователя (String username)
+     * @return true / false
+     */
+    public boolean userExists(String username) {
+        return userRepository.findUserByUsername(username).isPresent();
+    }
+
 }
