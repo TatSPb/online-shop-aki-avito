@@ -3,9 +3,11 @@ package ru.skypro.homework.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.dto.AdsCount;
 import ru.skypro.homework.dto.CommentCount;
 import ru.skypro.homework.dto.CommentDTO;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.User;
@@ -23,26 +25,15 @@ public class CommentService {
     private final AdRepository adRepository;
     private final CommentRepository commentRepository;
     private final UserService userService;
+    private final CommentMapper commentMapper;
 
-    Logger LOG = LoggerFactory.getLogger(AdService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdService.class);
 
-    public CommentService(AdRepository adRepository, CommentRepository commentRepository, UserService userService) {
+    public CommentService(AdRepository adRepository, CommentRepository commentRepository, UserService userService, CommentMapper commentMapper) {
         this.adRepository = adRepository;
         this.commentRepository = commentRepository;
         this.userService = userService;
-    }
-
-    /**
-     * Маппер для трансформации entity-объекта Comment в DTO-объект CommentDTO.
-     */
-    public CommentDTO commentToCommentDTO(Comment comment) {
-        return new CommentDTO(
-                comment.getAuthor().getId(),
-                comment.getAuthor().getImage() == null ? null : "/users/avatar/" + comment.getAuthor().getId(),
-                comment.getAuthor().getFirstName(),
-                comment.getCreatedAt(),
-                comment.getCommentId(),
-                comment.getText());
+        this.commentMapper = commentMapper;
     }
 
     /**
@@ -55,10 +46,10 @@ public class CommentService {
         LOG.info("Was invoked method GET_COMMENTS_OF_AD");
         Ad ad = adRepository.findById(adId).orElseThrow();
         List<Comment> commentList = commentRepository.findCommentsByAd(ad);
-        List<CommentDTO> commentsDTOList = commentList.stream()
-                .map(this::commentToCommentDTO)
-                .collect(Collectors.toList());
-        return new CommentCount(commentsDTOList.size(), commentsDTOList);
+        return new CommentCount(commentList.stream().
+                map(commentMapper::commentToCommentDTO)
+                .collect(Collectors.toList())
+        );
     }
 
     /**
@@ -77,7 +68,7 @@ public class CommentService {
                 Instant.now().toEpochMilli(),
                 textComment.getText());
         commentRepository.save(comment);
-        return commentToCommentDTO(comment);
+        return commentMapper.commentToCommentDTO(comment);
     }
 
     /**
@@ -122,7 +113,7 @@ public class CommentService {
         if (isUserCommentAuthorOrAdmin(comment, user)) {
             comment.setText(newText.getText());
             commentRepository.save(comment);
-            return commentToCommentDTO(comment);
+            return commentMapper.commentToCommentDTO(comment);
         } else throw new RuntimeException("This comment wasn't found!");
     }
 }
