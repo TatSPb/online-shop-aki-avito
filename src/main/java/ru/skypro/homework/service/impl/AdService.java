@@ -38,7 +38,7 @@ public class AdService {
     @Value("${path.to.ad.images}/")
     private String pathToAdImages;
 
-    public AdService(AdRepository adRepository, UserService userService, ImageService imageService, AdMapper adMapper, AdsCount adsCount) {
+    public AdService(AdRepository adRepository, UserService userService, ImageService imageService, AdMapper adMapper) {
         this.adRepository = adRepository;
         this.userService = userService;
         this.imageService = imageService;
