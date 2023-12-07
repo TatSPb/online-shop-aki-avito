@@ -144,7 +144,7 @@ public class UserService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByUsername(username).orElseThrow(NoSuchElementException::new);
+        User user = userRepository.findUserByUsername(username).orElseThrow();
         UserDetailsDTO userDetailsDTO = new UserDetailsDTO(user.getUsername(), user.getPassword(), user.getId(), user.getRole());
         return new UserPrincipal(userDetailsDTO);
     }

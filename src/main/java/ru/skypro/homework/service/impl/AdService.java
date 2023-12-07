@@ -33,7 +33,6 @@ public class AdService {
     private final UserService userService;
     private final ImageService imageService;
     private final AdMapper adMapper;
-    private final AdsCount adsCount;
 
     private static final Logger LOG = LoggerFactory.getLogger(AdService.class);
     @Value("${path.to.ad.images}/")
@@ -44,7 +43,6 @@ public class AdService {
         this.userService = userService;
         this.imageService = imageService;
         this.adMapper = adMapper;
-        this.adsCount = adsCount;
     }
 
     /**
