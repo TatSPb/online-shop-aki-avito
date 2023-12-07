@@ -2,6 +2,7 @@ package ru.skypro.homework.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +23,9 @@ public class WebSecurityConfig {
             "/v3/api-docs",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/ads" // оно?  BizinMitya 07/12 где открытый эндпоинт /ads? см. задание - список объявлений должен
+            // быть доступен на главной странице без аутентификации
     };
 
     @Bean
@@ -34,8 +37,11 @@ public class WebSecurityConfig {
                                 authorization
                                         .mvcMatchers(AUTH_WHITELIST)
                                         .permitAll()
+                                        .mvcMatchers(HttpMethod.GET, "/ads/image/**", "/ads", "/users/avatar/**")
+                                        .permitAll()
                                         .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
+                                        .authenticated()
+                )
                 .cors()
                 .and()
                 .httpBasic(withDefaults());
