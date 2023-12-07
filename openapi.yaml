@@ -15,7 +15,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewPassword'
+              $ref: '#/components/schemas/NewPasswordDto'
       responses:
         '200':
           description: OK
@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserDto'
           description: OK
         '401':
           description: Unauthorized
@@ -124,7 +124,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ads'
+                $ref: '#/components/schemas/AdDto'
     post:
       tags:
         - Объявления
@@ -201,7 +201,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Comment'
+                $ref: '#/components/schemas/CommentDto'
         '401':
           description: Unauthorized
         '404':
@@ -339,7 +339,7 @@ paths:
           content:
             'application/json':
               schema:
-                $ref: '#/components/schemas/Comment'
+                $ref: '#/components/schemas/CommentDto'
         '403':
           description: Forbidden
         '401':
@@ -358,7 +358,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ads'
+                $ref: '#/components/schemas/AdDto'
           description: OK
         '401':
           description: Unauthorized
@@ -636,4 +636,4 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Comment'
+            $ref: '#/components/schemas/CommentDto'
