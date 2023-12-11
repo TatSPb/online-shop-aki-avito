@@ -1,8 +1,6 @@
 package ru.skypro.homework.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -10,8 +8,6 @@ import java.util.List;
 
 @Data
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "ads")
 public class Ad {
     @Id
@@ -25,7 +21,6 @@ public class Ad {
     @OneToOne(targetEntity = Image.class, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "image_id")
     private Image image;
-
 
     private String description;
     private Integer price;
@@ -51,6 +46,6 @@ public class Ad {
         this.title = title;
     }
 
-    public Ad(Integer author, String image, Integer price, String title) {
+    public Ad() {
     }
 }

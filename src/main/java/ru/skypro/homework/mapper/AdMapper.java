@@ -1,11 +1,11 @@
 package ru.skypro.homework.mapper;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.model.Ad;
 
-@Service //иначе ошибка выскакивает, что конструктор не может найти bean
+@Component
 public class AdMapper {
     /**
      * Маппер для трансформации entity-объекта Ad в DTO-объект AdDTO.

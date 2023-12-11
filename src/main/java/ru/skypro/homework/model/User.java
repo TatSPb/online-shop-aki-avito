@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,14 +78,12 @@ public class User {
     }
 
 
-    public User(String username, String password, String firstName, String lastName, String phone
-    ) {
+    public User(String username, String password, String firstName, String lastName, String phone) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
-
     }
 
     public Integer getId() {

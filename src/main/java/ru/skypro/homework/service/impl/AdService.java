@@ -9,12 +9,13 @@ import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.AdsCount;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
-import ru.skypro.homework.exception.NoPermissonException;
+import ru.skypro.homework.exception.NoPermissionException;
 import ru.skypro.homework.exception.UnauthorizedException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.repository.ImageRepository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,16 +34,18 @@ public class AdService {
     private final UserService userService;
     private final ImageService imageService;
     private final AdMapper adMapper;
+    private final ImageRepository imageRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(AdService.class);
     @Value("${path.to.ad.images}/")
     private String pathToAdImages;
 
-    public AdService(AdRepository adRepository, UserService userService, ImageService imageService, AdMapper adMapper) {
+    public AdService(AdRepository adRepository, UserService userService, ImageService imageService, AdMapper adMapper, ImageRepository imageRepository) {
         this.adRepository = adRepository;
         this.userService = userService;
         this.imageService = imageService;
         this.adMapper = adMapper;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -69,16 +72,12 @@ public class AdService {
     public AdDTO addAd(CreateOrUpdateAd createOrUpdateAd, MultipartFile file) throws UnauthorizedException {
         LOG.info("Was invoked method ADD_AD");
         User user = userService.getAuthUser();
-        // BizinMitya 6/12 эта проверка не нужно, потому что в WebSecurityConfig уже настроено,
-        // что запрос может выполнять только аутентифицированный юзер
-//        if (user == null) {
-//            throw new UnauthorizedException();
-//        }
         if (isNotEmptyAndNotNull(createOrUpdateAd.getDescription()) && createOrUpdateAd.getPrice() >= 0
                 && isNotEmptyAndNotNull(createOrUpdateAd.getTitle())) {
             Ad ad = new Ad(user, createOrUpdateAd.getDescription(), null, createOrUpdateAd.getPrice(),
                     createOrUpdateAd.getTitle());
             Ad savedAd = adRepository.save(ad);
+            LOG.info("Добавлено новое объявление с id={}", ad.getPk());
             imageService.updateAdImage(savedAd.getPk(), file);
             return adMapper.adToDTO(savedAd);
         }
@@ -108,6 +107,7 @@ public class AdService {
         Ad ad = getAdById(id);
         if (isUserAdAuthorOrAdmin(ad, user)) {
             adRepository.delete(ad);
+            LOG.info("Удалено объявление с id={} и заголовком: {}", ad.getPk(), ad.getTitle());
         }
     }
 
@@ -141,6 +141,7 @@ public class AdService {
                 ad.setTitle(createOrUpdateAd.getTitle());
                 ad.setPrice(createOrUpdateAd.getPrice());
             }
+            LOG.info("Обновлено объявление с id={}", ad.getPk());
             return adMapper.adToDTO(adRepository.save(ad));
         }
         throw new IllegalArgumentException();
@@ -168,7 +169,7 @@ public class AdService {
      * @param file - картинка объявления (MultipartFile file)
      * @return DTO-объект обновленного объявления
      */
-    public AdDTO updateAdImage(Integer adId, MultipartFile file) throws NoPermissonException {
+    public AdDTO updateAdImage(Integer adId, MultipartFile file) throws NoPermissionException {
         LOG.info("Was invoked method UPDATE_AD_IMAGE_AdServ");
         User user = userService.getAuthUser();
         Ad ad = getAdById(adId);
@@ -183,7 +184,20 @@ public class AdService {
             }
             return adMapper.adToDTO(ad);
         } else {
-            throw new NoPermissonException();
+            throw new NoPermissionException();
         }
+    }
+    /**
+     * Метод для поиска объявлений по части названия.
+     *
+     * @param req - часть названия объявления (String req)
+     * @return список объявлений, соответствующих условию.
+     */
+    public AdsCount searchAds(String req) {
+        List<Ad> list = adRepository.findAdsByTitleContaining(req);
+        return new AdsCount(list.stream().
+                map(adMapper::adToDTO)
+                .collect(Collectors.toList())
+        );
     }
 }

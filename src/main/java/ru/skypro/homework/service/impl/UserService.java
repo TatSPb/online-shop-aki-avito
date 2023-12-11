@@ -21,7 +21,6 @@ import ru.skypro.homework.repository.UserRepository;
 
 import javax.transaction.Transactional;
 
-import java.util.NoSuchElementException;
 
 import static ru.skypro.homework.utils.ValidationUtils.isNotEmptyAndNotNull;
 
