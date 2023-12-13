@@ -187,17 +187,4 @@ public class AdService {
             throw new NoPermissionException();
         }
     }
-    /**
-     * Метод для поиска объявлений по части названия.
-     *
-     * @param req - часть названия объявления (String req)
-     * @return список объявлений, соответствующих условию.
-     */
-    public AdsCount searchAds(String req) {
-        List<Ad> list = adRepository.findAdsByTitleContaining(req);
-        return new AdsCount(list.stream().
-                map(adMapper::adToDTO)
-                .collect(Collectors.toList())
-        );
-    }
 }

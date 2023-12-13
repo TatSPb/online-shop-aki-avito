@@ -31,31 +31,12 @@ public class ImageController {
      * Отдают массив байтов по ссылке на картинку объявления / аватар пользователя.
      */
     @GetMapping(value = "ads/image/{id}")
-    public FileSystemResource getAdImage(@PathVariable Integer id) throws IOException {
+    public FileSystemResource getAdImage(@PathVariable Integer id) {
         return imageService.getAdImage(id);
     }
 
     @GetMapping(value = "users/avatar/{id}")
-    public FileSystemResource getUserImage(@PathVariable Integer id) throws IOException {
+    public FileSystemResource getUserImage(@PathVariable Integer id) {
         return imageService.getUserImage(id);
     }
-
-    //    /**
-//     * ОБНОВЛЕНИЕ КАРТИНКИ ТОВАРА В ОБЪЯВЛЕНИИ.
-//     *
-//     * @param id   - идентификатор объявления (Integer id)
-//     * @param file - файл с новым изображением товара (MultipartFile file).
-//     * @return ответ сервера со статусом 200 / 401 / 403 / 404
-//     */
-//    @Tag(name = "Объявления")
-//    @Operation(summary = "Обновить картинку объявления")
-//    @ApiResponse(responseCode = "200", description = "OK")
-//    @ApiResponse(responseCode = "401", description = "UNAUTHORIZED")
-//    @ApiResponse(responseCode = "403", description = "FORBIDDEN")
-//    @ApiResponse(responseCode = "404", description = "NOT_FOUND")
-//    @PatchMapping("ads/{id}/image")
-//    public ResponseEntity<?> updateImage(@PathVariable Integer id,
-//                                         @RequestParam("image") MultipartFile file) throws NoPermissionException {
-//        return ResponseEntity.ok().body(adService.updateAdImage(id, file));
-//    }
 }
