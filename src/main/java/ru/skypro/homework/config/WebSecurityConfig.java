@@ -23,9 +23,7 @@ public class WebSecurityConfig {
             "/v3/api-docs",
             "/webjars/**",
             "/login",
-            "/register",
-            "/ads" // оно?  BizinMitya 07/12 где открытый эндпоинт /ads? см. задание - список объявлений должен
-            // быть доступен на главной странице без аутентификации
+            "/register"
     };
 
     @Bean

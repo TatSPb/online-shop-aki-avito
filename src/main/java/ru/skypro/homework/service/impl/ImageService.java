@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.Ad;
@@ -28,12 +29,18 @@ public class ImageService {
 
     private UserRepository userRepository;
     private AdRepository adRepository;
-    private static final Logger LOG = LoggerFactory.getLogger(AdService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImageService.class);
     @Value("${path.to.ad.images}/")
     private String pathToAdImages;
 
     @Value("${path.to.user.images}/")
     private String pathToUserImages;
+
+    public ImageService(ImageRepository imageRepository, UserRepository userRepository, AdRepository adRepository) {
+        this.imageRepository = imageRepository;
+        this.userRepository = userRepository;
+        this.adRepository = adRepository;
+    }
 
     /**
      * Метод для обновления картинки объявления.
@@ -73,6 +80,7 @@ public class ImageService {
      * @return вывод в консоль информации, успешно ли удален аватар
      */
     private void deleteAdImageIfExists(String fileName) {
+        LOG.info("Was invoked method DELETE_AD_IMAGE_IF_EXISTS");
         Path path = Paths.get(Path.of(pathToUserImages).toAbsolutePath().toString(),
                 fileName);
 
@@ -115,7 +123,6 @@ public class ImageService {
                 imageName);
         writeFile(tempFile, file);
     }
-
     /**
      * Метод для удаления аватара (изображения) пользователя.
      *
@@ -123,13 +130,14 @@ public class ImageService {
      * @return вывод в консоль информации, успешно ли удален аватар
      */
     private void deleteAvatarIfExists(String fileName) {
+        LOG.info("Was invoked method DELETE_AVATAR_IF_EXISTS");
         Path path = Paths.get(Path.of(pathToUserImages).toAbsolutePath().toString(),
                 fileName);
 
         try {
             boolean result = Files.deleteIfExists(path);
             if (result) {
-                System.out.println("File is successfully deleted.");
+                System.out.println("File was successfully deleted.");
             } else {
                 System.out.println("File deletion failed.");
             }
@@ -137,6 +145,27 @@ public class ImageService {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Метод для получения аватара пользователя.
+     */
+    public FileSystemResource getUserImage(Integer id) {
+        LOG.info("Was invoked method GET_USER_IMAGE");
+        User user = userRepository.findUserById(id).orElseThrow();
+        return new FileSystemResource(Path.of(pathToUserImages, user.getImage().getImageName()));
+    }
+
+    /**
+     * Метод для получения картинки объявления.
+     */
+    public FileSystemResource getAdImage(Integer id) {
+        LOG.info("Was invoked method GET_AD_IMAGE");
+        Ad ad = adRepository.findById(id).orElseThrow();
+        Image image = ad.getImage();
+        return new FileSystemResource(Path.of(pathToAdImages, image.getImageName()));
+    }
+
+
 
     private void init() {
         File adImageDir = new File(pathToAdImages);

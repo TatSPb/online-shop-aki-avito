@@ -4,13 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.exception.NoPermissonException;
+import ru.skypro.homework.exception.NoPermissionException;
 import ru.skypro.homework.exception.UnauthorizedException;
 import ru.skypro.homework.service.impl.AdService;
 import ru.skypro.homework.service.impl.CommentService;
@@ -19,7 +20,7 @@ import ru.skypro.homework.service.impl.CommentService;
 /**
  * КОНТРОЛЛЕР ДЛЯ РАБОТЫ С ОБЪЯВЛЕНИЯМИ И КОММЕНТАРИЯМИ
  */
-
+@Slf4j
 @RestController
 @RequestMapping("/ads")
 @CrossOrigin(value = "http://localhost:3000")
@@ -136,7 +137,7 @@ public class AdsController {
     @ApiResponse(responseCode = "404", description = "NOT_FOUND")
     @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateImage(@PathVariable Integer id,
-                                         @RequestParam("image") MultipartFile file) throws NoPermissonException {
+                                         @RequestParam("image") MultipartFile file) throws NoPermissionException {
         return ResponseEntity.ok().body(adService.updateAdImage(id, file));
     }
 

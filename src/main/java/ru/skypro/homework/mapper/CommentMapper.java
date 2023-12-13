@@ -1,10 +1,10 @@
 package ru.skypro.homework.mapper;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.CommentDTO;
 import ru.skypro.homework.model.Comment;
 
-@Service //иначе ошибка выскакивает, что конструктор не может найти bean
+@Component
 public class CommentMapper {
     /**
      * Маппер для трансформации entity-объекта Comment в DTO-объект CommentDTO.
